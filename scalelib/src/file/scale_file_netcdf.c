@@ -1250,6 +1250,7 @@ int32_t file_put_axis_c( const int32_t fid,        // (in)
 
   TYPE2NCTYPE(dtype, xtype);
   CHECK_ERROR( nc_def_var(ncid, name, xtype, 1, &dimid, &varid) )
+  CHECK_ERROR( nc_def_var_deflate(ncid, varid, 1, 1, files[fid]->deflate_level) )
   if ( strlen(desc)>0  ) CHECK_ERROR( nc_put_att_text(ncid, varid, "long_name", strlen(desc), desc) )
   if ( strlen(units)>0 ) CHECK_ERROR( nc_put_att_text(ncid, varid, "units", strlen(units), units) )
 
@@ -1320,6 +1321,7 @@ int32_t file_def_axis_c( const int32_t fid,      // (in)
       CHECK_ERROR( nc_def_dim(ncid, dim_name, dim_size, &dimid) )
 
     CHECK_ERROR( nc_def_var(ncid, name, xtype, 1, &dimid, &varid) )
+    CHECK_ERROR( nc_def_var_deflate(ncid, varid, 1, 1, files[fid]->deflate_level) )
     if ( strlen(desc)>0 )  CHECK_ERROR( nc_put_att_text(ncid, varid, "long_name", strlen(desc), desc) )
     if ( strlen(units)>0 ) CHECK_ERROR( nc_put_att_text(ncid, varid, "units", strlen(units), units) )
 
@@ -1330,6 +1332,7 @@ int32_t file_def_axis_c( const int32_t fid,      // (in)
       sprintf(buf, "%s_bnds", dim_name);
       CHECK_ERROR( nc_put_att_text(ncid, varid, "bounds", strlen(buf), buf) )
       CHECK_ERROR( nc_def_var(ncid, buf, NC_DOUBLE, 2, dimids, &varid) )
+      CHECK_ERROR( nc_def_var_deflate(ncid, varid, 1, 1, files[fid]->deflate_level) )
     }
   }
 
@@ -1409,6 +1412,7 @@ int32_t file_put_associatedcoordinate_c( const int32_t fid,        // (in)
   TYPE2NCTYPE(dtype, xtype);
 
   CHECK_ERROR( nc_def_var(ncid, name, xtype, ndims, dimids, &varid) )
+  CHECK_ERROR( nc_def_var_deflate(ncid, varid, 1, 1, files[fid]->deflate_level) )
   if ( strlen(desc)>0 )  CHECK_ERROR( nc_put_att_text(ncid, varid, "long_name", strlen(desc), desc) )
   if ( strlen(units)>0 ) CHECK_ERROR( nc_put_att_text(ncid, varid, "units", strlen(units), units) )
   free(dimids);
@@ -1474,6 +1478,7 @@ int32_t file_def_associatedcoordinate_c( const int32_t fid,        // (in)
       CHECK_ERROR( nc_inq_dimid(ncid, dim_names[i], dimids+ndims-i-1) )
 
     CHECK_ERROR( nc_def_var(ncid, name, xtype, ndims, dimids, &varid) )
+    CHECK_ERROR( nc_def_var_deflate(ncid, varid, 1, 1, files[fid]->deflate_level) )
     if ( strlen(desc) >0 ) CHECK_ERROR( nc_put_att_text(ncid, varid, "long_name", strlen(desc), desc) )
     if ( strlen(units)>0 ) CHECK_ERROR( nc_put_att_text(ncid, varid, "units", strlen(units), units) )
   }
@@ -1620,6 +1625,7 @@ int32_t file_add_variable_c( const int32_t  fid,     // (in)
         CHECK_ERROR( nc_def_dim(ncid, tname, 0, &tdimid) )
         tdims[nt]->dimid = tdimid;
         CHECK_ERROR( nc_def_var(ncid, tname, NC_DOUBLE, 1, &tdimid, &tvarid) )
+        CHECK_ERROR( nc_def_var_deflate(ncid, tvarid, 1, 1, files[fid]->deflate_level) )
         tdims[nt]->varid = tvarid;
         strcpy(buf, "time");
         CHECK_ERROR( nc_put_att_text(ncid, tvarid, "long_name", strlen(buf), buf) )
@@ -1633,6 +1639,7 @@ int32_t file_add_variable_c( const int32_t  fid,     // (in)
         CHECK_ERROR( nc_put_att_text(ncid, tvarid, "bounds", strlen(buf), buf) )
         dimids[0] = tdimid;
         CHECK_ERROR( nc_def_var(ncid, buf, NC_DOUBLE, 2, dimids, &tvarid) )
+        CHECK_ERROR( nc_def_var_deflate(ncid, tvarid, 1, 1, files[fid]->deflate_level) )
         tdims[nt]->bndsid = tvarid;
         //CHECK_ERROR( nc_put_att_text(ncid, tvarid, "units", strlen(files[fid]->time_units), files[fid]->time_units) )
       }
@@ -1780,7 +1787,7 @@ int32_t file_add_variable_c( const int32_t  fid,     // (in)
   // set chunk size and deflate level (NetCDF-4 only)
   if ( ! files[fid]->shared_mode && files[fid]->deflate_level > 0 ) {
     CHECK_ERROR( nc_def_var_chunking(ncid, varid, NC_CHUNKED, vars[nvar]->count) )
-    CHECK_ERROR( nc_def_var_deflate(ncid, varid, 0, 1, files[fid]->deflate_level) )
+    CHECK_ERROR( nc_def_var_deflate(ncid, varid, 1, 1, files[fid]->deflate_level) )
   }
 #endif
 
